@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Wizard — BDI-II · EGEP-5 · AMAS-A · IDARE</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{--brand:#217293;--muted:#666}
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f4f6f8;color:#222;}
+    .wrap{max-width:1100px;margin:20px auto;padding:18px;display:grid;grid-template-columns:260px 1fr;gap:16px;}
+    .menu{background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+    .menu h2{margin:0 0 8px;color:var(--brand)}
+    .menu button{display:block;width:100%;text-align:left;padding:10px;border-radius:8px;border:1px solid #e9f0f2;background:#fbfeff;margin:8px 0;cursor:pointer;font-size:0.97rem}
+    .menu button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .content{background:#fff;border-radius:10px;padding:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);min-height:640px;display:flex;flex-direction:column}
+    .header{display:flex;align-items:center;justify-content:space-between}
+    .header h1{margin:0;font-size:1.05rem;color:var(--brand)}
+    .frame-wrap{flex:1;margin-top:12px;border:1px solid #e6eef0;border-radius:8px;overflow:hidden;min-height:560px}
+    iframe{width:100%;height:100%;border:0;min-height:560px;display:block}
+    .small{font-size:0.9rem;color:var(--muted)}
+    .footer{margin-top:12px;text-align:center;color:var(--muted);font-size:0.9rem}
+    @media(max-width:920px){ .wrap{grid-template-columns:1fr} .menu{order:2} .content{order:1} }
+  </style>
+</head>
+<body>
+  <div class="wrap" role="application">
+    <aside class="menu" aria-label="Menú instrumentos">
+      <h2>Selecciona instrumento</h2>
+      <button id="btn-bdi" data-id="bdi">BDI-II — Beck (Depresión)</button>
+      <button id="btn-egep" data-id="egep">EGEP-5 — Estrés Postraumático</button>
+      <button id="btn-amas" data-id="amas">AMAS-A — Ansiedad</button>
+      <button id="btn-idare" data-id="idare">IDARE / STAI — Ansiedad Estado/Rasgo</button>
+      <div class="small" style="margin-top:10px">Recuerda que esta solo es una herramienta con fines académicos y no diagnósticos.</div>
+    </aside>
+
+    <main class="content" id="main">
+      <div class="header">
+        <h1 id="title">BDI-II — Vista previa</h1>
+        <div>
+          <button id="open-new" style="background:#f0f0f0;border:1px solid #ddd;padding:8px;border-radius:6px;cursor:pointer">Abrir en ventana nueva</button>
+        </div>
+      </div>
+
+      <div class="frame-wrap" id="frameWrap" aria-live="polite">
+        <iframe id="viewer" title="Visor de instrumento"></iframe>
+      </div>
+
+      <div class="footer">Herramienta elaborada y diseñada por Psic. R. Josafat Acosta García en 2025</div>
+    </main>
+  </div>
+
+  <!-- IMPORTANT: use <template> to store raw HTML safely (avoids premature closing issues) -->
+  <!-- Each template contains exactly the HTML you provided (no modifications to content) -->
+
+  <template id="src-bdi"><!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>BDI-II — Evaluación e Interpretación Clínica</title>
+  <style>
+    body {font-family: Arial, sans-serif; background:#f8f8fa; padding:34px;}
+    .container {background:#fff; padding:28px; border-radius:8px; box-shadow:0 0 12px #ccc; max-width:500px; margin:auto;}
+    h1 {font-size:1.28rem; color:#207292; text-align:center;}
+    h1 small {font-size:0.75rem; display:block; margin-top:6px; color:#555;}
+    label {display:block; margin-top:16px; margin-bottom:6px; font-weight:bold;}
+    input[type=number] {width:90px; padding:9px; font-size:1.25em; text-align:center; border:1px solid #aaa; border-radius:4px;}
+    button, .copiar-btn {background:#217293; color:#fff; border:none; border-radius:4px; padding:11px 20px; margin:12px 6px 0 0; cursor:pointer; font-size:1rem;}
+    button:hover, .copiar-btn:hover {background:#186083;}
+    .result {margin-top:25px; line-height:1.6;}
+    .nivel {font-weight:bold; font-size:1.1em;}
+    .integ {margin-top:22px; padding-top:15px; border-top:2px solid #217293;}
+    .apa {margin-top:22px; padding-top:10px; border-top:1px solid #ddd; font-size:0.95em; color:#444;}
+    .footer {text-align:center; margin-top:45px; color:#999; font-size:0.9em;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BDI-II<br><small>Inventario de Depresión de Beck-II</small></h1>
+
+    <label>Puntaje bruto total (0–63)</label>
+    <input id="puntaje" type="number" min="0" max="63" required placeholder="0 a 63">
+
+    <br><br>
+    <button onclick="calcularBDI2()">Calcular e interpretar</button>
+    <button class="copiar-btn" onclick="copiarReporte()" id="cpBtn" style="display:none;">Copiar reporte</button>
+    <button class="copiar-btn" onclick="window.print()" id="prBtn" style="display:none;">Imprimir / PDF</button>
+
+    <div class="result" id="resultado"></div>
+  </div>
+
+  <div class="footer">
+    BDI-II — Herramienta digital de interpretación clínica 2025<br>
+    Adaptación española: Sanz, J., et al. (2003) — TEA Ediciones
+  </div>
+
+  <script>
+    function interpretarBDI2(puntaje) {
+      if (puntaje <= 13)  return {nivel: "Mínima", color: "#2e7d32", percentil: "< 25", desc: "Depresión mínima o ausente. No se observan síntomas depresivos clínicamente relevantes."};
+      if (puntaje <= 19)  return {nivel: "Leve", color: "#388e3c", percentil: "25–50", desc: "Depresión leve. Sintomatología presente pero no incapacitante. Puede beneficiarse de seguimiento o intervención preventiva."};
+      if (puntaje <= 28) return {nivel: "Moderada", color: "#f9a825", percentil: "50–85", desc: "Depresión moderada. Impacto significativo en el funcionamiento diario. Recomendable evaluación y tratamiento psicológico."};
+      return                     {nivel: "Severa", color: "#c62828", percentil: "≥ 85", desc: "Depresión severa. Alto riesgo de complicaciones (suicidalidad, aislamiento). Intervención urgente: terapia y posible farmacoterapia."};
+    }
+
+    function recomendacionClinica(puntaje) {
+      if (puntaje >= 29) return "Depresión severa detectada. Evaluar riesgo suicida inmediatamente. Recomendar terapia cognitivo-conductual (TCC), antidepresivos y seguimiento multidisciplinar.";
+      if (puntaje >= 20) return "Depresión moderada. Beneficio de TCC, psicoeducación y monitoreo de síntomas. Considerar derivación a psiquiatría si persiste.";
+      if (puntaje >= 14) return "Depresión leve. Estrategias de autocuidado, actividad física y terapia breve. Monitorear evolución.";
+      return "Nivel depresivo mínimo. Mantener hábitos saludables y reevaluación si hay cambios.";
+    }
+
+    function calcularBDI2() {
+      let p = parseInt(document.getElementById('puntaje').value);
+
+      if (isNaN(p) || p < 0 || p > 63) {
+        document.getElementById("resultado").innerHTML = "<b style='color:red'>Introduce un valor entre 0 y 63</b>";
+        return;
+      }
+
+      let interp = interpretarBDI2(p);
+      let recom  = recomendacionClinica(p);
+
+      let html = `
+        <div><b>Puntaje total BDI-II:</b> ${p}/63</div>
+        <div class="nivel" style="color:${interp.color};">→ ${interp.nivel} (percentil ${interp.percentil})</div><br>
+
+        <div>${interp.desc}</div>
+
+        <div class="integ"><b>Interpretación e indicaciones clínicas:</b><br>${recom}</div>
+
+        <div class="apa">
+          <b>Referencias (APA 7):</b><br>
+          Beck, A. T., Steer, R. A., & Brown, G. K. (1996). <i>Beck Depression Inventory–II.</i> Psychological Corporation.<br>
+          Adaptación española: Sanz, J., Perdigón, A. L., & Vázquez, C. (2003). Adaptación española del Inventario para la Depresión de Beck-II (BDI-II): 2. Propiedades psicométricas en población general. <i>Clínica y Salud, 14</i>(3), 249–280.
+        </div>`;
+
+      document.getElementById("resultado").innerHTML = html;
+      document.getElementById("cpBtn").style.display = "inline-block";
+      document.getElementById("prBtn").style.display = "inline-block";
+    }
+
+    function copiarReporte() {
+      navigator.clipboard.writeText(document.getElementById("resultado").innerText)
+        .then(() => alert("Reporte copiado al portapapeles"));
+    }
+  </script>
+</html></template>
+
+  <template id="src-amas"><!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>AMAS-A — Evaluación e Interpretación Clínica</title>
+  <style>
+    body {font-family: Arial, sans-serif; background:#f8f8fa; padding:34px;}
+    .container {background:#fff; padding:28px; border-radius:8px; box-shadow:0 0 12px #ccc; max-width:480px; margin:auto;}
+    h1 {font-size:1.25rem; color:#207292; text-align:center;}
+    h1 small {font-size:0.75rem; display:block; margin-top:4px; color:#555;}
+    label {display:block; margin-top:14px; margin-bottom:5px; font-weight:bold;}
+    input[type=number] {width:90px; padding:8px; font-size:1.2em; text-align:center;}
+    button, .copiar-btn {background:#217293; color:#fff; border:none; border-radius:4px; padding:10px 18px; margin:10px 5px 0 0; cursor:pointer;}
+    button:hover, .copiar-btn:hover {background:#186083;}
+    .result {margin-top:20px; line-height:1.5;}
+    .small {font-size:0.92em; color:#555;}
+    .integ {margin-top:20px; padding-top:15px; border-top:2px solid #217293;}
+    .apa {margin-top:20px; padding-top:10px; border-top:1px solid #ddd; font-size:0.94em; color:#444;}
+    .footer {text-align:center; margin-top:40px; color:#999; font-size:0.9em;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Interpretación Amplia AMAS-A<br><small>Adult Manifest Anxiety Scale – Adultos</small></h1>
+
+    <label>Preocupación / Hipersensibilidad (0–16)</label>
+    <input id="preocupacion" type="number" min="0" max="16" required>
+
+    <label>Ansiedad Fisiológica (0–16)</label>
+    <input id="fisiologica" type="number" min="0" max="16" required>
+
+    <label>Ansiedad Social / Estrés (0–4)</label>
+    <input id="social" type="number" min="0" max="4" required>
+
+    <label>Escala de Mentira (0–6)</label>
+    <input id="mentira" type="number" min="0" max="6" required>
+
+    <br><br>
+    <button onclick="calcularAMAS()">Calcular e interpretar</button>
+    <button class="copiar-btn" onclick="copiarReporte()" id="cpBtn" style="display:none;">Copiar reporte</button>
+    <button class="copiar-btn" onclick="window.print()" id="prBtn" style="display:none;">Imprimir / PDF</button>
+
+    <div class="result" id="resulT"></div>
+  </div>
+
+  <div class="footer">
+    AMAS-A — Herramienta digital de interpretación clínica © 2025<br>Uso académico y profesional
+  </div>
+
+  <script>
+    function interpPreocupacion(p) {
+      if (p <= 4)  return {nivel:"Muy baja", color:"#2e7d32", texto:"Preocupación mínima."};
+      if (p <= 8)  return {nivel:"Baja", color:"#388e3c", texto:"Preocupación leve y funcional."};
+      if (p <= 11) return {nivel:"Media", color:"#f9a825", texto:"Preocupación moderada."};
+      if (p <= 13) return {nivel:"Elevada", color:"#ef6c00", texto:"Preocupación notable."};
+      return {nivel:"Muy elevada", color:"#c62828", texto:"Preocupación intensa. Requiere atención."};
+    }
+
+    function interpFisiologica(p) {
+      if (p <= 3)  return {nivel:"Muy baja", color:"#2e7d32", texto:"Pocas manifestaciones somáticas."};
+      if (p <= 7)  return {nivel:"Normal", color:"#388e3c", texto:"Síntomas leves y ocasionales."};
+      if (p <= 10) return {nivel:"Moderada", color:"#f9a825", texto:"Síntomas frecuentes pero manejables."};
+      return {nivel:"Alta", color:"#c62828", texto:"Importante activación fisiológica."};
+    }
+
+    function interpSocial(p) {
+      if (p == 0) return {nivel:"Nula", color:"#2e7d32", texto:"Sin malestar social significativo."};
+      if (p <= 2) return {nivel:"Leve", color:"#7cb342", texto:"Ansiedad social leve."};
+      return {nivel:"Elevada", color:"#c62828", texto:"Ansiedad social clínicamente relevante."};
+    }
+
+    function interpTotal(t) {
+      if (t <= 7)  return {nivel:"Muy baja",  percentil:"<25",  color:"#2e7d32"};
+      if (t <= 14) return {nivel:"Normal",        percentil:"25–75", color:"#388e3c"};
+      if (t <= 21) return {nivel:"Elevada",   percentil:"76–94", color:"#ef6c00"};
+      return {nivel:"Clínica", percentil:"≥95", color:"#c62828"};
+    }
+
+    function interpMentira(m) {
+      if (m <= 2) return {val:"Válido",       color:"#2e7d32", txt:"Protocolo confiable."};
+      if (m <= 4) return {val:"Precaución",   color:"#ef6c00", txt:"Posible minimización."};
+      return {val:"Inválido", color:"#c62828", txt:"Alta deseabilidad social."};
+    }
+
+    function calcularAMAS() {
+      let pre = parseInt(document.getElementById('preocupacion').value);
+      let fis = parseInt(document.getElementById('fisiologica').value);
+      let soc = parseInt(document.getElementById('social').value);
+      let men = parseInt(document.getElementById('mentira').value);
+
+      if (isNaN(pre) || isNaN(fis) || isNaN(soc) || isNaN(men)) {
+        document.getElementById("resulT").innerHTML = "<b style='color:red'>Completa todos los campos</b>";
+        return;
+      }
+
+      let total = pre + fis + soc;
+
+      let ipre = interpPreocupacion(pre);
+      let ifis = interpFisiologica(fis);
+      let isoc = interpSocial(soc);
+      let itot = interpTotal(total);
+      let imen = interpMentira(men);
+
+      let integral = (men > 2) 
+        ? "⚠️ <b>VALIDEZ DUDOSA</b> – Escala de Mentira elevada. Los puntajes de ansiedad pueden estar subestimados."
+        : (total >= 22 ? "Ansiedad clínicamente significativa en varias dimensiones. Se recomienda evaluación y posible tratamiento."
+        : total >= 15 ? "Ansiedad elevada. Beneficio de técnicas de manejo del estrés."
+        : "Ansiedad dentro de rango funcional. Sin intervención específica por ahora.");
+
+      let html = `
+        <div><b>Puntaje Total Ansiedad:</b> ${total} → 
+          <span style="color:${itot.color};">${itot.nivel}</span> (percentil ${itot.percentil})</div><br>
+
+        <div><b>Preocupación/Hipersensibilidad:</b> ${pre}/16 → <span style="color:${ipre.color};">${ipre.nivel}</span><br>
+          <span class="small">${ipre.texto}</span></div>
+
+        <div><b>Ansiedad Fisiológica:</b> ${fis}/16 → <span style="color:${ifis.color};">${ifis.nivel}</span><br>
+          <span class="small">${ifis.texto}</span></div>
+
+        <div><b>Ansiedad Social/Estrés:</b> ${soc}/4 → <span style="color:${isoc.color};">${isoc.nivel}</span><br>
+          <span class="small">${isoc.texto}</span></div>
+
+        <div><b>Escala de Mentira:</b> ${men}/6 → <span style="color:${imen.color};">${imen.val}</span><br>
+          <span class="small">${imen.txt}</span></div>
+
+        <div class="integ"><b>Interpretación clínica:</b><br>${integral}</div>
+
+        <div class="apa">
+          <b>Referencia APA:</b><br>
+          Reynolds, C. R., Richmond, B. O., & Lowe, P. A. (2003). <i>Adult Manifest Anxiety Scale (AMAS).</i> Western Psychological Services.<br>
+          Adaptación española: TEA Ediciones (2012).
+        </div>`;
+
+      document.getElementById("resulT").innerHTML = html;
+      document.getElementById("cpBtn").style.display = "inline-block";
+      document.getElementById("prBtn").style.display = "inline-block";
+    }
+
+    function copiarReporte() {
+      navigator.clipboard.writeText(document.getElementById("resulT").innerText)
+        .then(() => alert("¡Reporte copiado al portapapeles!"));
+    }
+  </script>
+</html></template>
+
+  <template id="src-egep"><!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>EGEP-5 — Cuestionario Interactivo y Calificación</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body {font-family: Arial, sans-serif; background:#f8f8fa; padding:20px; max-width:900px; margin:auto;}
+    .container {background:#fff; padding:20px; border-radius:8px; box-shadow:0 0 10px #ccc;}
+    h1 {font-size:1.5rem; color:#207292; text-align:center; margin:0 0 8px;}
+    h2 {font-size:1.15rem; color:#333; margin-top:18px;}
+    table {width:100%; border-collapse:collapse; margin:10px 0;}
+    th, td {border:1px solid #e2e2e2; padding:8px; vertical-align:middle;}
+    th {background:#fafafa; text-align:left;}
+    .controls {display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+    input[type=checkbox], input[type=radio] {margin-right:6px;}
+    select, textarea {width:100%; padding:8px; margin:6px 0; box-sizing:border-box;}
+    button {background:#217293; color:#fff; border:none; border-radius:4px; padding:10px 18px; cursor:pointer; margin-top:12px;}
+    button:hover {background:#186083;}
+    .result {margin-top:22px; padding:14px; border:1px solid #ddd; background:#fff; display:none; white-space:pre-wrap;}
+    .badge {display:inline-block; padding:6px 10px; border-radius:18px; color:#fff; font-weight:700; margin-right:8px;}
+    .small {font-size:0.92em; color:#555;}
+    .footer {text-align:center; margin-top:18px; color:#999; font-size:0.9em;}
+    .note {font-size:0.9em; color:#444; margin-top:8px;}
+    .flex {display:flex; gap:10px; align-items:center;}
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <h1>EGEP-5: Evaluación Global de Estrés Postraumático</h1>
+    <p class="small">Completa el cuestionario y presiona "Calcular" para obtener puntajes e interpretación. Esta herramienta es una aproximación clínica; la evaluación diagnóstica definitiva requiere juicio profesional.</p>
+
+    <h2>Sección 1: Acontecimientos</h2>
+    <table id="acontecimientos">
+      <thead>
+        <tr><th>Acontecimiento</th><th>Me sucedió</th><th>Lo presencié</th><th>Sucedió a alguien cercano</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1. Desastres naturales</td><td><input type="checkbox" data-id="1-me"></td><td><input type="checkbox" data-id="1-pres"></td><td><input type="checkbox" data-id="1-cer"></td></tr>
+        <tr><td>2. Accidentes de transporte</td><td><input type="checkbox" data-id="2-me"></td><td><input type="checkbox" data-id="2-pres"></td><td><input type="checkbox" data-id="2-cer"></td></tr>
+        <tr><td>3. Otros accidentes</td><td><input type="checkbox" data-id="3-me"></td><td><input type="checkbox" data-id="3-pres"></td><td><input type="checkbox" data-id="3-cer"></td></tr>
+        <tr><td>4. Combate o zona de guerra</td><td><input type="checkbox" data-id="4-me"></td><td><input type="checkbox" data-id="4-pres"></td><td><input type="checkbox" data-id="4-cer"></td></tr>
+        <tr><td>5. Violación o abuso sexual</td><td><input type="checkbox" data-id="5-me"></td><td><input type="checkbox" data-id="5-pres"></td><td><input type="checkbox" data-id="5-cer"></td></tr>
+        <tr><td>6. Acoso o maltrato psicológico</td><td><input type="checkbox" data-id="6-me"></td><td><input type="checkbox" data-id="6-pres"></td><td><input type="checkbox" data-id="6-cer"></td></tr>
+        <tr><td>7. Violencia física</td><td><input type="checkbox" data-id="7-me"></td><td><input type="checkbox" data-id="7-pres"></td><td><input type="checkbox" data-id="7-cer"></td></tr>
+        <tr><td>8. Actos terroristas o tortura</td><td><input type="checkbox" data-id="8-me"></td><td><input type="checkbox" data-id="8-pres"></td><td><input type="checkbox" data-id="8-cer"></td></tr>
+        <tr><td>9. Encarcelamiento o cautividad</td><td><input type="checkbox" data-id="9-me"></td><td><input type="checkbox" data-id="9-pres"></td><td><input type="checkbox" data-id="9-cer"></td></tr>
+        <tr><td>10. Muerte accidental o violenta</td><td><input type="checkbox" data-id="10-me"></td><td><input type="checkbox" data-id="10-pres"></td><td><input type="checkbox" data-id="10-cer"></td></tr>
+        <tr><td>11. Otro acontecimiento</td><td><input type="checkbox" data-id="11-me"></td><td><input type="checkbox" data-id="11-pres"></td><td><input type="checkbox" data-id="11-cer"></td></tr>
+      </tbody>
+    </table>
+
+    <label>Descripción del otro acontecimiento (11):</label>
+    <textarea id="desc11" rows="2" placeholder="Opcional"></textarea>
+
+    <label>Acontecimiento que causa más malestar (rodea uno):</label>
+    <select id="principal">
+      <option value="">Seleccione</option>
+      <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+      <option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option>
+    </select>
+
+    <label>Descripción breve del acontecimiento principal:</label>
+    <textarea id="descPrincipal" rows="2" placeholder="Breve descripción (opcional)"></textarea>
+
+    <div class="flex">
+      <div style="flex:1">
+        <label>Gravedad:</label>
+        <select id="gravedad">
+          <option value="">Seleccione</option>
+          <option value="leve">Leve</option><option value="moderada">Moderada</option><option value="grave">Grave</option><option value="extrema">Extrema</option>
+        </select>
+      </div>
+      <div style="flex:1">
+        <label>Cuándo ocurrió por primera vez:</label>
+        <select id="cuando">
+          <option value="">Seleccione</option>
+          <option value="infancia">Infancia/adolescencia</option><option value="mas3">Hace más de 3 meses</option><option value="1a3">Hace 1-3 meses</option><option value="ultimo">Último mes</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex" style="margin-top:8px;">
+      <div style="flex:1">
+        <label>Ocurrió:</label>
+        <select id="frecuencia">
+          <option value="">Seleccione</option>
+          <option value="unica">Única ocasión</option><option value="varias">Varias ocasiones</option><option value="repetida">Forma repetida</option>
+        </select>
+      </div>
+      <div style="flex:1">
+        <label>Durante el acontecimiento se sintió (marque Sí/No):</label>
+        <div class="small">
+          Con miedo: <label><input type="radio" name="16" value="si">Sí</label> <label><input type="radio" name="16" value="no">No</label>
+          &nbsp;·&nbsp;
+          Indefenso: <label><input type="radio" name="17" value="si">Sí</label> <label><input type="radio" name="17" value="no">No</label>
+          &nbsp;·&nbsp;
+          Horrorizado: <label><input type="radio" name="18" value="si">Sí</label> <label><input type="radio" name="18" value="no">No</label>
+        </div>
+      </div>
+    </div>
+
+    <h2>Sección 2: Síntomas (27–49)</h2>
+    <p class="note">Para cada síntoma marque Si/No y, si aplica, el grado de molestia 0–4 (0 = ninguna, 4 = extrema). Si marca "No", el grado se ignora y se considera 0.</p>
+
+    <table id="sintomas" aria-describedby="note-sintomas">
+      <thead>
+        <tr><th style="width:52%">Síntoma (número)</th><th style="width:10%">Si/No</th><th style="width:38%">Grado (0–4)</th></tr>
+      </thead>
+      <tbody id="sintomas-body">
+        <!-- Filas generadas por JS -->
+      </tbody>
+    </table>
+
+    <label>50. Desde cuándo experimenta estos problemas:</label>
+    <select id="duracion">
+      <option value="">Seleccione</option>
+      <option value="menos1">Menos de 1 mes</option><option value="1a3">1-3 meses</option><option value="mas3">Más de 3 meses</option>
+    </select>
+
+    <label>51. Tiempo en que aparecieron los síntomas:</label>
+    <select id="inicio">
+      <option value="">Seleccione</option>
+      <option value="inmediato">Nada más ocurrir</option><option value="6meses">Durante los primeros 6 meses</option><option value="mas6">6 meses o más después</option>
+    </select>
+
+    <h2>Sección 3: Funcionamiento (52–58)</h2>
+    <p class="note">Marque Sí si el síntoma ha afectado esa área.</p>
+    <table id="funcionamiento">
+      <thead><tr><th>Pregunta</th><th>Sí</th><th>No</th></tr></thead>
+      <tbody>
+        <tr><td>52. Consultado profesional</td><td><input type="radio" name="52" value="si"></td><td><input type="radio" name="52" value="no"></td></tr>
+        <tr><td>53. Tomado medicación</td><td><input type="radio" name="53" value="si"></td><td><input type="radio" name="53" value="no"></td></tr>
+        <tr><td>54. Consumo alcohol/drogas para afrontar</td><td><input type="radio" name="54" value="si"></td><td><input type="radio" name="54" value="no"></td></tr>
+        <tr><td>55. Afectado vida laboral/académica</td><td><input type="radio" name="55" value="si"></td><td><input type="radio" name="55" value="no"></td></tr>
+        <tr><td>56. Afectado relaciones sociales</td><td><input type="radio" name="56" value="si"></td><td><input type="radio" name="56" value="no"></td></tr>
+        <tr><td>57. Afectado relaciones familiares/pareja</td><td><input type="radio" name="57" value="si"></td><td><input type="radio" name="57" value="no"></td></tr>
+        <tr><td>58. Afectado otro aspecto</td><td><input type="radio" name="58" value="si"></td><td><input type="radio" name="58" value="no"></td></tr>
+      </tbody>
+    </table>
+
+    <div class="controls">
+      <button id="calcularBtn">Calcular Puntajes e Interpretación</button>
+      <button id="copiarBtn" style="display:none;" type="button">Copiar reporte</button>
+      <button id="imprimirBtn" style="display:none;" type="button">Imprimir / PDF</button>
+    </div>
+
+    <div id="resultado" class="result" role="status" aria-live="polite"></div>
+
+    <div class="footer">EGEP-5 Interactivo — Uso académico. Basado en TEA Ediciones (2017).</div>
+  </div>
+
+  <script>
+    // Mapear items 27..49 en dominios:
+    // B (Intrusivos): 27-31 (5 ítems) -> max 20
+    // C (Evitación): 32-33 (2 ítems) -> max 8
+    // D (Cognitivas/Ánimo): 34-40 (7 ítems) -> max 28
+    // E (Activación/React): 41-46 (6 ítems) -> max 24
+    // Disociativos: 47-49 (3 ítems) -> max 12
+    const items = [];
+    for (let n = 27; n <= 49; n++) {
+      // Descripciones placeholder: reemplaza con enunciados oficiales si los tienes
+      items.push({ num: n, text: `Síntoma ${n}` });
+    }
+
+    // Generar filas de la tabla síntomas
+    const tbody = document.getElementById('sintomas-body');
+    items.forEach(it => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${it.num}.</strong> ${it.text}</td>
+        <td style="text-align:center;">
+          <label><input type="radio" name="present-${it.num}" value="si">Si</label>
+          <label><input type="radio" name="present-${it.num}" value="no" checked>No</label>
+        </td>
+        <td>
+          <label><input type="radio" name="grade-${it.num}" value="0" checked>0</label>
+          <label><input type="radio" name="grade-${it.num}" value="1">1</label>
+          <label><input type="radio" name="grade-${it.num}" value="2">2</label>
+          <label><input type="radio" name="grade-${it.num}" value="3">3</label>
+          <label><input type="radio" name="grade-${it.num}" value="4">4</label>
+        </td>
+      `;
+      tbody.appendChild(tr);
+
+      // Si se selecciona "No", forzar grado 0; si "Si", mantener último grado seleccionado (no impuesto).
+      const presentRadios = tr.querySelectorAll(`input[name="present-${it.num}"]`);
+      presentRadios.forEach(r => {
+        r.addEventListener('change', () => {
+          if (r.value === 'no' && r.checked) {
+            // set grade to 0
+            const grade0 = tr.querySelector(`input[name="grade-${it.num}"][value="0"]`);
+            if (grade0) grade0.checked = true;
+          }
+        });
+      });
+    });
+
+    // Helper: obtener respuesta radio
+    function getRadioValue(name) {
+      const r = document.querySelector(`input[name="${name}"]:checked`);
+      return r ? r.value : null;
+    }
+
+    // Obtener sí/no del funcionamiento 52..58
+    function countFuncionamientoYes() {
+      let count = 0;
+      for (let n = 52; n <= 58; n++) {
+        const val = getRadioValue(String(n));
+        if (val === 'si') count++;
+      }
+      return count;
+    }
+
+    function calcularEGEP5() {
+      // Validaciones básicas
+      const principal = document.getElementById('principal').value;
+      const duracion = document.getElementById('duracion').value;
+      const inicio = document.getElementById('inicio').value;
+      if (!principal) {
+        alert('Selecciona el acontecimiento principal (campo requerido).');
+        return;
+      }
+      if (!duracion) {
+        alert('Indica la duración de los síntomas (campo requerido).');
+        return;
+      }
+      if (!inicio) {
+        alert('Indica el momento de inicio de los síntomas (campo requerido).');
+        return;
+      }
+
+      // Calcular por dominio
+      const sums = { B:0, C:0, D:0, E:0, DIS:0 };
+      const countsGE2 = { B:0, C:0, D:0, E:0, DIS:0 }; // cuenta de ítems con grado >=2 (para criterio de presencia)
+      items.forEach(it => {
+        const present = getRadioValue(`present-${it.num}`) === 'si';
+        const gradeVal = parseInt(getRadioValue(`grade-${it.num}`) || '0', 10);
+        const grade = (present ? gradeVal : 0); // si marcado no -> 0
+        // asignar dominio
+        if (it.num >= 27 && it.num <= 31) { sums.B += grade; if (grade >= 2) countsGE2.B++; }
+        else if (it.num >= 32 && it.num <= 33) { sums.C += grade; if (grade >= 2) countsGE2.C++; }
+        else if (it.num >= 34 && it.num <= 40) { sums.D += grade; if (grade >= 2) countsGE2.D++; }
+        else if (it.num >= 41 && it.num <= 46) { sums.E += grade; if (grade >= 2) countsGE2.E++; }
+        else if (it.num >= 47 && it.num <= 49) { sums.DIS += grade; if (grade >= 2) countsGE2.DIS++; }
+      });
+
+      // Totales máximos por dominio (para referencia)
+      const max = { B:20, C:8, D:28, E:24, DIS:12, TOTAL:80 };
+      const totalSymptoms = sums.B + sums.C + sums.D + sums.E; // B–E total (max 80)
+
+      // Criterios DSM-5 aproximados usando conteo de ítems >=2
+      const meetB = countsGE2.B >= 1; // >=1 síntoma intrusivo
+      const meetC = countsGE2.C >= 1; // >=1 evitación
+      const meetD = countsGE2.D >= 2; // >=2 negativos/cogn/ánimo
+      const meetE = countsGE2.E >= 2; // >=2 activación/reactividad
+      const meetG = countFuncionamientoYes() >= 1; // afectación funcional
+      const duracionMayor1m = (duracion !== 'menos1'); // true si >=1 mes
+      const disociativoSubtipo = countsGE2.DIS >= 1; // aproximación: al menos 1 disociativo >=2
+      const expresionRetardada = (inicio === 'mas6');
+
+      // Diagnóstico aproximado
+      let diag = '';
+      let diagColor = '#388e3c';
+      if (meetB && meetC && meetD && meetE && duracionMayor1m && meetG) {
+        diag = 'Cumple criterios aproximados para TEPT (DSM-5) — basado en conteo de síntomas grado ≥2 por dominio.';
+        diagColor = '#c62828';
+        if (disociativoSubtipo) diag += ' Posible subtipo disociativo (aprox.).';
+        if (expresionRetardada) diag += ' Presentación retardada (aparición >6 meses).';
+      } else if (!duracionMayor1m && meetB && meetC && meetD && meetE && meetG) {
+        diag = 'Posible Trastorno de Estrés Agudo (síntomas presentes pero duración <1 mes) — aproximación.';
+        diagColor = '#ef6c00';
+      } else {
+        diag = 'No cumple criterios completos para TEPT según esta aproximación. Evaluar clínicamente.';
+        diagColor = '#388e3c';
+      }
+
+      // Recomendaciones según total
+      function recomendacion(total) {
+        if (total >= 54) return 'Probable TEPT clínicamente significativo. Recomienda evaluación exhaustiva y tratamiento especializado (p. ej., TF-CBT, EMDR).';
+        if (total >= 33) return 'Sintomatología postraumática moderada-alta. Considerar intervención psicoterapéutica focalizada y seguimiento.';
+        if (total >= 20) return 'Sintomatología postraumática moderada. Considerar intervenciones preventivas o terapia focalizada.';
+        return 'Sintomatología baja o ausente. Monitoreo si hubo exposición reciente a trauma.';
+      }
+
+      // Niveles por dominio (porcentaje del máximo)
+      function nivelYcolor(score, maxScore) {
+        const pct = (maxScore>0) ? (score / maxScore) : 0;
+        if (pct < 0.2) return { nivel: 'Muy bajo', color:'#2e7d32' };
+        if (pct < 0.4) return { nivel: 'Bajo', color:'#388e3c' };
+        if (pct < 0.6) return { nivel: 'Moderado', color:'#f9a825' };
+        if (pct < 0.8) return { nivel: 'Alto', color:'#ef6c00' };
+        return { nivel: 'Muy alto', color:'#c62828' };
+      }
+
+      const nb = nivelYcolor(sums.B, max.B);
+      const nc = nivelYcolor(sums.C, max.C);
+      const nd = nivelYcolor(sums.D, max.D);
+      const ne = nivelYcolor(sums.E, max.E);
+      const nds = nivelYcolor(sums.DIS, max.DIS);
+      const nt = nivelYcolor(totalSymptoms, max.TOTAL);
+
+      // Construir report
+      const lines = [];
+      lines.push(`Resultado EGEP-5 — Informe aproximado`);
+      lines.push(`Acontecimiento principal: ${document.getElementById('principal').value} (${document.getElementById('descPrincipal').value || 'sin descripción'})`);
+      lines.push('');
+      lines.push(`Puntajes (sumas de grado 0–4 por ítem):`);
+      lines.push(`- Intrusivos (B): ${sums.B} / ${max.B} → ${nb.nivel}`);
+      lines.push(`- Evitación (C): ${sums.C} / ${max.C} → ${nc.nivel}`);
+      lines.push(`- Cognitivas y Ánimo (D): ${sums.D} / ${max.D} → ${nd.nivel}`);
+      lines.push(`- Activación y Reactividad (E): ${sums.E} / ${max.E} → ${ne.nivel}`);
+      lines.push(`- Disociativos: ${sums.DIS} / ${max.DIS} → ${nds.nivel}`);
+      lines.push(`- Total síntomas B–E: ${totalSymptoms} / ${max.TOTAL} → ${nt.nivel}`);
+      lines.push('');
+      lines.push(`Criterios por conteo (ítems con grado ≥2):`);
+      lines.push(`- Intrusivos (≥1 requerido): ${countsGE2.B} → ${countsGE2.B>=1 ? 'Presente' : 'Ausente'}`);
+      lines.push(`- Evitación (≥1 requerido): ${countsGE2.C} → ${countsGE2.C>=1 ? 'Presente' : 'Ausente'}`);
+      lines.push(`- Cognitivas/Ánimo (≥2 requeridos): ${countsGE2.D} → ${countsGE2.D>=2 ? 'Presente' : 'Ausente'}`);
+      lines.push(`- Activación/React. (≥2 requeridos): ${countsGE2.E} → ${countsGE2.E>=2 ? 'Presente' : 'Ausente'}`);
+      lines.push(`- Disociativos (subtipo aprox., ≥1): ${countsGE2.DIS} → ${countsGE2.DIS>=1 ? 'Posible' : 'No sugerido'}`);
+      lines.push('');
+      lines.push(`Funcionalidad afectada (ítems 52–58 marcados Sí): ${countFuncionamientoYes()}`);
+      lines.push(`Duración informada: ${document.getElementById('duracion').value}`);
+      lines.push(`Inicio temporal: ${document.getElementById('inicio').value}`);
+      lines.push('');
+      lines.push(`Evaluación diagnóstica (aprox.):`);
+      lines.push(diag);
+      lines.push('');
+      lines.push(`Recomendaciones:`);
+      lines.push(recomendacion(totalSymptoms));
+      lines.push('');
+      lines.push(`Notas: esta es una interpretación automatizada y aproximada. La evaluación diagnóstica requiere revisión clínica y los textos oficiales de ítems.`);
+      lines.push(`Referencia: Crespo, Gómez & Soberón (2017). EGEP-5. TEA Ediciones.`);
+
+      const resultadoEl = document.getElementById('resultado');
+      resultadoEl.textContent = lines.join('\n');
+      resultadoEl.style.display = 'block';
+
+      // Mostrar botones
+      document.getElementById('copiarBtn').style.display = 'inline-block';
+      document.getElementById('imprimirBtn').style.display = 'inline-block';
+    }
+
+    document.getElementById('calcularBtn').addEventListener('click', calcularEGEP5);
+
+    // Copiar reporte
+    document.getElementById('copiarBtn').addEventListener('click', () => {
+      const text = document.getElementById('resultado').innerText;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => alert('Reporte copiado al portapapeles.'));
+      } else {
+        alert('API de portapapeles no disponible. Seleccione y copie manualmente.');
+      }
+    });
+
+    // Imprimir
+    document.getElementById('imprimirBtn').addEventListener('click', () => window.print());
+  </script>
+</html></template>
+
+  <template id="src-idare"><!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>IDARE/STAI — Evaluación e Interpretación Clínica</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f8fa; padding: 34px;}
+    .container { background: #fff; padding: 28px; border-radius:8px; box-shadow: 0 0 12px #ccc; width:435px; margin:auto;}
+    h1 { font-size: 1.18rem; color: #207292;}
+    .result { font-size: 1.09em; margin-top: 20px;}
+    button, .copiar-btn { background:#217293;color:#fff; border-radius:4px; border:none; padding:10px 20px; font-size:1rem;margin-top:10px; margin-right:6px;}
+    button:hover, .copiar-btn:hover { background:#186083;}
+    label {display:block;margin-top:11px;margin-bottom:4px;}
+    input[type="number"] { width: 85px; font-size: 1.13em;}
+    .footer { font-size:14px; color:#bbb; text-align:center; margin-top:38px;}
+    .interprete {margin-bottom:16px;}
+    .integ {margin-top:14px;padding:10px 0;border-top:1px solid #ddd;}
+    .apa {color:#777;font-size:0.97em;margin-top:20px;border-top:1px solid #ddd;padding-top:9px;}
+  </style>
+</head>
+<body>
+  <div class="container" id="evalCont">
+    <h1>Interpretación Amplia IDARE (STAI)</h1>
+    <form id="idareTForm" onsubmit="return false;">
+      <label for="puntajeEstado">Puntaje Bruto Ansiedad Estado:</label>
+      <input id="puntajeEstado" type="number" min="0" max="60" required> 
+
+      <label for="puntajeRasgo">Puntaje Bruto Ansiedad Rasgo:</label>
+      <input id="puntajeRasgo" type="number" min="0" max="60" required>
+
+      <br>
+      <button onclick="calcularT()">Calcular puntajes e interpretación</button>
+      <button type="button" class="copiar-btn" onclick="copiarReporte()" style="display:none;" id="cpBtn">Copiar reporte</button>
+      <button type="button" class="copiar-btn" onclick="window.print()" style="display:none;" id="prBtn">Imprimir o PDF</button>
+    </form>
+    <div class="result" id="resulT"></div>
+  </div>
+  <div class="footer">
+    Evaluación digital IDARE / STAI — Interpretación ampliada + referencia APA.<br>
+    <span style="font-size:11px;">Uso académico.</span>
+  </div>
+  <script>
+    // Conversión Bruto -> T Score (puedes reemplazar la fórmula por tu tabla oficial)
+    function calculaT_IDARE(bruto, min = 0) {
+      return Math.round(35 + (bruto - min) * 0.75);
+    }
+
+    // Interpretación ANSIEDAD ESTADO
+    function interpretacionEstado(t) {
+      if (t < 55) return {
+        nivel: "Baja",
+        texto: "La ansiedad-estado se encuentra en niveles bajos. El evaluado no experimenta sintomatología ansiosa significativa en el momento actual. Suele mostrar adecuada capacidad de afrontamiento ante factores de estrés inmediatos."
+      };
+      if (t < 65) return {
+        nivel: "Promedio",
+        texto: "La ansiedad-estado está en rango promedio. Las respuestas ansiosas situacionales son normales y proporcionales al contexto de evaluación o circunstancias momentáneas, sin indicios de desestabilización emocional aguda."
+      };
+      return {
+        nivel: "Alta",
+        texto: "La ansiedad-estado es elevada. Se observa una reacción significativa de ansiedad frente al contexto actual, lo que puede estar relacionado con factores de estrés inmediatos, presiones externas o estados emocionales transitorios. Es recomendable monitorear y evaluar posibles desencadenantes."
+      };
+    }
+
+    // Interpretación ANSIEDAD RASGO
+    function interpretacionRasgo(t) {
+      if (t < 55) return {
+        nivel: "Baja",
+        texto: "La ansiedad-rasgo es baja. El evaluado tiende a mantener estabilidad emocional a largo plazo, mostrando baja propensión a experimentar ansiedad de forma habitual. Este perfil se asocia a recursos personales para afrontar el estrés."
+      };
+      if (t < 65) return {
+        nivel: "Promedio",
+        texto: "La ansiedad-rasgo es promedio. El individuo puede experimentar ocasionalmente síntomas ansiosos, pero no demuestra tendencia persistente a la inquietud o preocupación excesiva."
+      };
+      return {
+        nivel: "Alta",
+        texto: "La ansiedad-rasgo es elevada. Se observa una predisposición estable a responder con ansiedad en diversas situaciones. Este perfil puede implicar mayor vulnerabilidad ante el estrés sostenido y requerir intervenciones específicas para fortalecer estrategias de afrontamiento."
+      };
+    }
+
+    // Interpretación Integral Clínica y APA
+    function interpretacionIntegral_IDARE(tEstado, tRasgo) {
+      if (tEstado >= 65 && tRasgo < 65)
+        return "El perfil muestra una reacción ansiosa aguda pero sin predisposición crónica. Es posible que factores contextuales estén incidiendo en el estado emocional actual. Se sugiere seguimiento para identificar posibles desencadenantes recientes.<br><br><b>Referencia APA:</b> <br>Spielberger, C.D., Díaz-Guerrero, R. (1975). <i>IDARE, Inventario de Ansiedad Estado–Rasgo.</i> Manual. México: El Manual Moderno.";
+      if (tEstado < 65 && tRasgo >= 65)
+        return "La elevación del rasgo ansiógeno sin alta ansiedad-estado indica una tendencia habitual a experimentar ansiedad, aunque actualmente no se encuentra activada por el entorno. Es recomendable desarrollar mecanismos de autogestión y resiliencia. <br><br><b>Referencia APA:</b> <br>Spielberger, C.D., Díaz-Guerrero, R. (1975). <i>IDARE, Inventario de Ansiedad Estado–Rasgo.</i> Manual. México: El Manual Moderno.";
+      if (tEstado >= 65 && tRasgo >= 65)
+        return "Ambos puntajes se encuentran elevados, lo cual sugiere un alto nivel de ansiedad tanto en la actualidad como de manera crónica. Este patrón puede estar vinculado a estrés persistente, factores intrínsecos de personalidad y ambiente. Es aconsejable realizar una evaluación clínica integral y considerar intervención psicológica.<br><br><b>Referencia APA:</b> <br>Spielberger, C.D., Díaz-Guerrero, R. (1975). <i>IDARE, Inventario de Ansiedad Estado–Rasgo.</i> Manual. México: El Manual Moderno.";
+      if (tEstado < 55 && tRasgo < 55)
+        return "No se observan signos significativos de ansiedad, ni como reacción actual ni como tendencia estable. Perfil equilibrado que favorece el afrontamiento saludable de situaciones demandantes.<br><br><b>Referencia APA:</b> <br>Spielberger, C.D., Díaz-Guerrero, R. (1975). <i>IDARE, Inventario de Ansiedad Estado–Rasgo.</i> Manual. México: El Manual Moderno.";
+      // Otros casos (ambos en rango promedio o combinaciones intermedias)
+      return "Los niveles de ansiedad observados se consideran funcionales y no representan riesgo clínico relevante. Se recomienda monitoreo en casos de presencia de factores de riesgo adicionales.<br><br><b>Referencia APA:</b> <br>Spielberger, C.D., Díaz-Guerrero, R. (1975). <i>IDARE, Inventario de Ansiedad Estado–Rasgo.</i> Manual. México: El Manual Moderno.";
+    }
+
+    // Lógica principal
+    function calcularT() {
+      let brEstado = parseInt(document.getElementById('puntajeEstado').value);
+      let brRasgo  = parseInt(document.getElementById('puntajeRasgo').value);
+
+      if (isNaN(brEstado) || isNaN(brRasgo)) {
+        document.getElementById("resulT").innerHTML = "Completa ambos campos.";
+        document.getElementById("cpBtn").style.display = 'none';
+        document.getElementById("prBtn").style.display = 'none';
+        return;
+      }
+
+      let tEstado = calculaT_IDARE(brEstado, 0);
+      let tRasgo  = calculaT_IDARE(brRasgo, 0);
+
+      let datosEstado = interpretacionEstado(tEstado);
+      let datosRasgo  = interpretacionRasgo(tRasgo);
+      let iintegral   = interpretacionIntegral_IDARE(tEstado, tRasgo);
+
+      let resumen =
+        `<div class='interprete'><b>Ansiedad Estado:</b> T=${tEstado} <span style="color:#217293;">(${datosEstado.nivel})</span><br><span style="font-size:0.98em;">${datosEstado.texto}</span></div>
+         <div class='interprete'><b>Ansiedad Rasgo:</b> T=${tRasgo} <span style="color:#217293;">(${datosRasgo.nivel})</span><br><span style="font-size:0.98em;">${datosRasgo.texto}</span></div>
+         <div class='integ'><b>Interpretación Integral:</b><br><span style="font-size:0.98em;">${iintegral}</span></div>`;
+      document.getElementById("resulT").innerHTML = resumen;
+      document.getElementById("cpBtn").style.display = '';
+      document.getElementById("prBtn").style.display = '';
+    }
+
+    // --- COPIAR REPORTE AL PORTAPAPELES ---
+    function copiarReporte() {
+      let temp = document.createElement("textarea");
+      let text = limpiarHTMLforCopy(document.getElementById("resulT").innerHTML);
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand("copy");
+      document.body.removeChild(temp);
+      alert("¡Reporte copiado al portapapeles!");
+    }
+
+    // Limpieza HTML a texto plano y saltos de línea.
+    function limpiarHTMLforCopy(html) {
+      return html
+        .replace(/<div class='interprete'>/g, '')
+        .replace(/<div class='integ'>/g, '\n---\n')
+        .replace(/<\/div>/g, '\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/\n+/g, '\n')
+        .trim();
+    }
+  </script>
+</html></template>
+
+  <script>
+    // Read templates' innerHTML (safe: templates keep full content including <script> blocks)
+    const sources = {
+      bdi: document.getElementById('src-bdi').innerHTML,
+      amas: document.getElementById('src-amas').innerHTML,
+      egep: document.getElementById('src-egep').innerHTML,
+      idare: document.getElementById('src-idare').innerHTML
+    };
+
+    const viewer = document.getElementById('viewer');
+    const titleEl = document.getElementById('title');
+    const openNewBtn = document.getElementById('open-new');
+
+    const buttons = {
+      bdi: document.getElementById('btn-bdi'),
+      egep: document.getElementById('btn-egep'),
+      amas: document.getElementById('btn-amas'),
+      idare: document.getElementById('btn-idare')
+    };
+
+    // Use Blob URLs to load full HTML content reliably into iframe.
+    let currentBlobUrl = null;
+    function revokeCurrentBlob() {
+      if (currentBlobUrl) {
+        try { URL.revokeObjectURL(currentBlobUrl); } catch(e) {}
+        currentBlobUrl = null;
+      }
+    }
+
+    function loadIntoIframe(html) {
+      revokeCurrentBlob();
+      try {
+        const blob = new Blob([html], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        currentBlobUrl = url;
+        viewer.removeAttribute('srcdoc');
+        viewer.src = url;
+      } catch (err) {
+        // fallback
+        viewer.srcdoc = html;
+      }
+    }
+
+    function setActive(id) {
+      Object.keys(buttons).forEach(k => buttons[k].classList.toggle('active', k === id));
+      const mapTitle = { bdi: 'BDI-II — Beck (Depresión)', egep: 'EGEP-5 — Estrés Postraumático', amas: 'AMAS-A — Ansiedad', idare: 'IDARE / STAI — Ansiedad' };
+      titleEl.textContent = mapTitle[id] || 'Instrumento';
+
+      loadIntoIframe(sources[id]);
+
+      openNewBtn.onclick = () => {
+        if (currentBlobUrl) {
+          window.open(currentBlobUrl, '_blank');
+        } else {
+          const w = window.open('', '_blank');
+          if (!w) { alert('Permite popups para abrir la ventana.'); return; }
+          w.document.open();
+          w.document.write(sources[id]);
+          w.document.close();
+        }
+      };
+    }
+
+    Object.keys(buttons).forEach(k => {
+      buttons[k].addEventListener('click', () => setActive(k));
+    });
+
+    // Default
+    setActive('bdi');
+
+    window.addEventListener('unload', revokeCurrentBlob);
+  </script>
+</body>
+</html>
